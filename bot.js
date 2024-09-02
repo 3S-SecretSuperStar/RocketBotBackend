@@ -82,6 +82,8 @@ bot.onText(/\/setting/, (msg) => {
 });
  const getProfilePhotos = async (userId, bot_token) => {
     try {
+        console.log("bot token : ",bot_token)
+        console.log("uerId",userId)
       const profilesResponse = await fetch(`https://api.telegram.org/bot${bot_token}/getUserProfilePhotos?user_id=${userId}`);
       const profiles = await profilesResponse.json();
 
