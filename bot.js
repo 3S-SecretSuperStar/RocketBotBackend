@@ -44,7 +44,7 @@ const options = {
                 {
                     text: "Play click",
                     web_app: {
-                        url: "https://mini-app-rocket-game-6qmt.vercel.app/"
+                        url: "https://miniapprocketgame.onrender.com"
                     }
                 }
             ]
