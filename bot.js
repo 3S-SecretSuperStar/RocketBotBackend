@@ -119,7 +119,7 @@ bot.on("message", async (msg) => {
             console.log(userAvatarUrl);
             let realName = "";
             msg.from.first_name && (realName += msg.from.first_name);
-            msg.from.last_name && (realName += msg.from.last_name);
+            msg.from.last_name && (realName +=(" " + msg.from.last_name));
             console.log(msg.from);
             console.log(realName);
             const headers = new Headers();
