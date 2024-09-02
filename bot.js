@@ -115,7 +115,7 @@ bot.on("message", async (msg) => {
         try {
             const friend = subString;
             const userName = msg.from.username;
-            const userAvatarUrl = getProfilePhotos(userID,token)
+            const userAvatarUrl = await getProfilePhotos(userID,token)
             console.log(userAvatarUrl);
             let realName = "";
             msg.from.first_name && (realName += msg.from.first_name);
