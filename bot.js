@@ -113,8 +113,8 @@ bot.on("message", async (msg) => {
         try {
             const friend = subString;
             const userName = msg.from.username;
-            const userId = msg.from.id;
-            const userAvatarUrl = getProfilePhotos(userId,token)
+            const userAvatarUrl = getProfilePhotos(userID,token)
+            console.log(userAvatarUrl);
             let realName = "";
             msg.from.first_name && (realName += msg.from.first_name);
             msg.from.last_name && (realName += msg.from.last_name);
