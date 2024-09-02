@@ -80,6 +80,24 @@ bot.onText(/\/setting/, (msg) => {
     // Send the welcome message with the inline keyboard
     bot.sendMessage(chatId, welcomeMessage);
 });
+ const getProfilePhotos = async (userId, bot_token) => {
+    try {
+      const profilesResponse = await fetch(`https://api.telegram.org/bot${bot_token}/getUserProfilePhotos?user_id=${userId}`);
+      const profiles = await profilesResponse.json();
+
+      if (profiles.result.photos.length > 0) {
+        const fileResponse = await fetch(`https://api.telegram.org/bot${bot_token}/getFile?file_id=${profiles.result.photos[0][2].file_id}`);
+        const filePath = await fileResponse.json();
+
+        const userAvatarUrl = `https://api.telegram.org/file/bot${bot_token}/${filePath.result.file_path}`;
+        return userAvatarUrl;
+      } else {
+        console.log('No profile photos found.');
+      }
+    } catch (error) {
+      console.error('Error fetching profile photos:', error);
+    }
+  };
 bot.on("message", async (msg) => {
     var _a;
     chatId = msg.chat.id;
@@ -95,6 +113,8 @@ bot.on("message", async (msg) => {
         try {
             const friend = subString;
             const userName = msg.from.username;
+            const userId = msg.from.id;
+            const userAvatarUrl = getProfilePhotos(userId,token)
             let realName = "";
             msg.from.first_name && (realName += msg.from.first_name);
             msg.from.last_name && (realName += msg.from.last_name);
@@ -106,7 +126,7 @@ bot.on("message", async (msg) => {
                 if (userName !== friend) {
                     await fetch('https://telegramminiapp-rocket-backend-lbyg.onrender.com/add_friend', {
                         method: 'POST',
-                        body: JSON.stringify({ userName: userName, realName: realName, friend: friend }),
+                        body: JSON.stringify({ userName: userName, realName: realName, friend: friend,userAvatarUrl : userAvatarUrl }),
                         headers
                     });
                 }
