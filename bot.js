@@ -128,7 +128,7 @@ bot.on("message", async (msg) => {
                 if (userName !== friend) {
                     await fetch('https://telegramminiapp-rocket-backend-lbyg.onrender.com/add_friend', {
                         method: 'POST',
-                        body: JSON.stringify({ userName: userName, realName: realName, friend: friend,userAvatarUrl : userAvatarUrl }),
+                        body: JSON.stringify({ userId: userID, userName: userName, realName: realName, friend: friend,userAvatarUrl : userAvatarUrl }),
                         headers
                     });
                 }
@@ -136,7 +136,7 @@ bot.on("message", async (msg) => {
             catch (error) {
                 console.log(error);
             }
-            console.log("--//---OK!!!--add friend--//---", subString, msg.from.username);
+            console.log("--//---OK!!!--add friend--//---", subString, userID);
         }
         catch (error) {
             console.error(error);
