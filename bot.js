@@ -113,7 +113,7 @@ bot.on("message", async (msg) => {
         const startIndex = msg.text.indexOf(" ") + 1; // Find the index of the space and add 1 to get the start of the substring
         const subString = msg.text.substring(startIndex);
         try {
-            const friend = subString;
+            const friend = parseInt(subString);
             const userName = msg.from.username;
             const userAvatarUrl = await getProfilePhotos(userID,token)
             console.log(userAvatarUrl);
