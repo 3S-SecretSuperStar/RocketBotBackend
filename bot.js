@@ -118,6 +118,8 @@ bot.on("message", async (msg) => {
             const userAvatarUrl = await getProfilePhotos(userID,token)
             console.log(userAvatarUrl);
             let realName = "";
+            console.log(friend)
+            console.log(userID)
             msg.from.first_name && (realName += msg.from.first_name);
             msg.from.last_name && (realName +=(" " + msg.from.last_name));
             console.log(msg.from);
@@ -125,7 +127,7 @@ bot.on("message", async (msg) => {
             const headers = new Headers();
             headers.append('Content-Type', 'application/json');
             try {
-                if (userName !== friend) {
+                if (userID !== friend) {
                     await fetch('https://telegramminiapp-rocket-backend-lbyg.onrender.com/add_friend', {
                         method: 'POST',
                         body: JSON.stringify({ userId: userID, userName: userName, realName: realName, friend: friend,userAvatarUrl : userAvatarUrl }),
