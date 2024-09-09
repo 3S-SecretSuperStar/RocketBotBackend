@@ -58,7 +58,7 @@ bot.onText(/\/start/, (msg) => {
     const userID = msg.from.id;
     // USER_ID = chatId;
     console.log("--//---myChatID----//---", chatId);
-    const welcomeMessage = "Hello! Welcome to the Rocket Bot!";
+    const welcomeMessage = "Hello! Welcome to the RocketTON GAME!";
     // Send the welcome message with the inline keyboard
     bot.sendMessage(chatId, welcomeMessage, options);
 });
