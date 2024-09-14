@@ -109,7 +109,7 @@ bot.on("message", async (msg) => {
     console.log("--//---myChatID----//---", chatId);
     console.log("--//---myUserID----//---", userID, msg.from.id, userID, msg.from.username);
     // Check if the message is from the specific group and the specific user
-    if (msg.text.includes("/start") && msg.text !== "/start") {
+    if (msg.text && msg.text.includes("/start") && msg.text !== "/start") {
         const startIndex = msg.text.indexOf(" ") + 1; // Find the index of the space and add 1 to get the start of the substring
         const subString = msg.text.substring(startIndex);
         try {
