@@ -67,7 +67,7 @@ bot.onText(/\/help/, (msg) => {
     const userID = msg.from.id;
     // USER_ID = chatId;
     console.log("--//---myChatID----//---", chatId);
-    const welcomeMessage = "Hello! Welcome to the Erne Legacy Bot!";
+    const welcomeMessage = "Hello! Welcome to the Rocket TON Game!";
     // Send the welcome message with the inline keyboard
     bot.sendMessage(chatId, welcomeMessage);
 });
@@ -76,7 +76,7 @@ bot.onText(/\/setting/, (msg) => {
     const userID = msg.from.id;
     // USER_ID = chatId;
     console.log("--//---myChatID----//---", chatId);
-    const welcomeMessage = "Hello! Welcome to the Erne Legacy Bot!";
+    const welcomeMessage = "Hello! Welcome to the Rocket TON Game!";
     // Send the welcome message with the inline keyboard
     bot.sendMessage(chatId, welcomeMessage);
 });
