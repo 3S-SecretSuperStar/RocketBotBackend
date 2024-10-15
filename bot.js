@@ -6,21 +6,41 @@ const dotenv = require("dotenv");
 const axios = require("axios");
 const express = require("express");
 const cors = require("cors");
-// const http = require('http');
-// Create a new Express app
-// const app = express();
+const { userStates, resetUserState } = require('./state')
+const { addPost } = require('./post')
+
 // Load environment variables
 dotenv.config();
 const token = process.env.TELEGRAM_TOKEN;
-console.log("Bot token:", token); // Confirm token is loaded
+let textPost = ''
+let buttonName = ''
+let buttonUrl = ''
+let userlist = [];
+const adminlist = [6802660922, 136031568];
+
+const headers = new Headers();
+headers.append('Content-Type', 'application/json')
+
+const fetchData = async () => {
+    await fetch(`${process.env.SERVER_URL}/all_users_id`, { method: 'POST', headers })
+        .then(res => Promise.all([res.status, res.json()]))
+        .then(([status, data]) => {
+            userlist = data;
+
+        })
+}
+fetchData();
+console.log("await");
+
 // Create a new Telegram bot using polling to fetch new updates
-// const bot = new TelegramBot(token, { polling: true });
-const bot = new TelegramBot(token, { polling: true, request: {
+const bot = new TelegramBot(token, {
+    polling: true, request: {
         agentOptions: {
             keepAlive: true,
             family: 4
         }
-    } });
+    }
+});
 // Assign telegram channel id
 const groupUsername = process.env.GROUP_USERNAME;
 const channelUsername = process.env.CHANNEL_USERNAME;
@@ -42,7 +62,7 @@ const options = {
         inline_keyboard: [
             [
                 {
-                    text: "Play click",
+                    text: "🚀 PLAY CLICK 🚀",
                     web_app: {
                         url: "https://miniapprocketgame.onrender.com"
                     }
@@ -54,6 +74,7 @@ const options = {
 bot.setMyCommands(BotMenu);
 // Handle the /start command
 bot.onText(/\/start/, (msg) => {
+    resetUserState()
     chatId = msg.chat.id;
     const userID = msg.from.id;
     // USER_ID = chatId;
@@ -63,6 +84,7 @@ bot.onText(/\/start/, (msg) => {
     bot.sendMessage(chatId, welcomeMessage, options);
 });
 bot.onText(/\/help/, (msg) => {
+    resetUserState()
     chatId = msg.chat.id;
     const userID = msg.from.id;
     // USER_ID = chatId;
@@ -72,6 +94,7 @@ bot.onText(/\/help/, (msg) => {
     bot.sendMessage(chatId, welcomeMessage);
 });
 bot.onText(/\/setting/, (msg) => {
+    resetUserState()
     chatId = msg.chat.id;
     const userID = msg.from.id;
     // USER_ID = chatId;
@@ -80,31 +103,64 @@ bot.onText(/\/setting/, (msg) => {
     // Send the welcome message with the inline keyboard
     bot.sendMessage(chatId, welcomeMessage);
 });
- const getProfilePhotos = async (userId, bot_token) => {
+bot.onText(/\/announce/, (msg) => {
+    resetUserState()
+    console.log("announce")
+    const chatId = msg.chat.id;
+    const userId = msg.from.id.toString();
+    if (!adminlist.includes(parseInt(userId))) return;
+    const text = msg.text ? msg.text.trim() : '';
+
+    userStates.set(userId, { step: 'waiting_text' });
+    bot.sendMessage(
+        chatId,
+        'Post:'
+    );
+
+})
+bot.on('polling_error', (error) => {
+    console.log(`[polling_error] ${error.code}: ${error.message}`);
+});
+const getProfilePhotos = async (userId, bot_token) => {
     try {
-        console.log("bot token : ",bot_token)
-        console.log("uerId",userId)
-      const profilesResponse = await fetch(`https://api.telegram.org/bot${bot_token}/getUserProfilePhotos?user_id=${userId}`);
-      const profiles = await profilesResponse.json();
+        
+        const profilesResponse = await fetch(`https://api.telegram.org/bot${bot_token}/getUserProfilePhotos?user_id=${userId}`);
+        const profiles = await profilesResponse.json();
 
-      if (profiles.result.photos.length > 0) {
-        const fileResponse = await fetch(`https://api.telegram.org/bot${bot_token}/getFile?file_id=${profiles.result.photos[0][2].file_id}`);
-        const filePath = await fileResponse.json();
+        if (profiles.result.photos.length > 0) {
+            const fileResponse = await fetch(`https://api.telegram.org/bot${bot_token}/getFile?file_id=${profiles.result.photos[0][2].file_id}`);
+            const filePath = await fileResponse.json();
 
-        const userAvatarUrl = `https://api.telegram.org/file/bot${bot_token}/${filePath.result.file_path}`;
-        return userAvatarUrl;
-      } else {
-        console.log('No profile photos found.');
-      }
+            const userAvatarUrl = `https://api.telegram.org/file/bot${bot_token}/${filePath.result.file_path}`;
+            return userAvatarUrl;
+        } else {
+            console.log('No profile photos found.');
+        }
     } catch (error) {
-      console.error('Error fetching profile photos:', error);
+        console.error('Error fetching profile photos:', error);
     }
-  };
+};
+
 bot.on("message", async (msg) => {
-    var _a;
+    let _a;
     chatId = msg.chat.id;
     USER_ID = chatId;
     const userID = msg.from.id;
+    const userId = userID.toString();
+    const text = msg.text ? msg.text.trim() : '';
+
+
+    // Define bot commands
+    const BotMenu = [
+        { command: "start", description: "Welcome" },
+        { command: "help", description: "Help" },
+        { command: "setting", description: "Setting" },
+    ];
+    if (adminlist.includes(parseInt(userId)))
+        BotMenu.push({ command: "announce", description: "Announce" })
+    // Set bot commands
+    bot.setMyCommands(BotMenu);
+
     USER_NAME = (_a = msg.from) === null || _a === void 0 ? void 0 : _a.username;
     console.log("--//---myChatID----//---", chatId);
     console.log("--//---myUserID----//---", userID, msg.from.id, userID, msg.from.username);
@@ -115,13 +171,13 @@ bot.on("message", async (msg) => {
         try {
             const friend = parseInt(subString);
             const userName = msg.from.username;
-            const userAvatarUrl = await getProfilePhotos(userID,token)
+            const userAvatarUrl = await getProfilePhotos(userID, token)
             console.log(userAvatarUrl);
             let realName = "";
             console.log(friend)
             console.log(userID)
             msg.from.first_name && (realName += msg.from.first_name);
-            msg.from.last_name && (realName +=(" " + msg.from.last_name));
+            msg.from.last_name && (realName += (" " + msg.from.last_name));
             console.log(msg.from);
             console.log(realName);
             const headers = new Headers();
@@ -130,7 +186,7 @@ bot.on("message", async (msg) => {
                 if (userID !== friend) {
                     await fetch('https://telegramminiapp-rocket-backend-lbyg.onrender.com/add_friend', {
                         method: 'POST',
-                        body: JSON.stringify({ userId: userID, userName: userName, realName: realName, friend: friend,userAvatarUrl : userAvatarUrl }),
+                        body: JSON.stringify({ userId: userID, userName: userName, realName: realName, friend: friend, userAvatarUrl: userAvatarUrl }),
                         headers
                     });
                 }
@@ -142,6 +198,46 @@ bot.on("message", async (msg) => {
         }
         catch (error) {
             console.error(error);
+        }
+    }
+
+    if (text.startsWith('/')) {
+        resetUserState()
+        return;
+    }
+    const state = userStates.get(userId); // Fetch the user's state
+    console.log(state)
+    if (state) {
+        switch (state.step) {
+
+            case 'waiting_text':
+                textPost = text;
+                console.log("text of post", textPost);
+
+                bot.sendMessage(chatId,
+                    `Button’s title:`
+                )
+                userStates.set(userId, { step: "wating_button_name" })
+                break;
+            case 'wating_button_name':
+                bot.sendMessage(userId,
+                    `Button’s URL:`
+                )
+                buttonName = text
+                userStates.set(userId, { step: "wating_button_url" })
+                console.log("name of button", buttonName)
+                break;
+            case 'wating_button_url':
+                buttonUrl = text
+                resetUserState(userId)
+                console.log("url of button", buttonUrl)
+                userlist.forEach(user => {
+                    addPost(bot, user.user_id, textPost, buttonName, buttonUrl)
+                });
+                userlist.forEach(userId => {
+                    console.log(userId)
+                });
+                break;
         }
     }
 });
