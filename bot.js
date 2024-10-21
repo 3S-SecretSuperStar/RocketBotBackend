@@ -7,7 +7,7 @@ const axios = require("axios");
 const express = require("express");
 const cors = require("cors");
 const { userStates, resetUserState } = require('./state')
-const { addPost } = require('./post')
+const { addPost, logMessage } = require('./post')
 
 // Load environment variables
 dotenv.config();
@@ -19,7 +19,7 @@ let buttonUrl = ''
 // let userlist = [{ user_id: 6977492118 }];
 
 
-const userIds = [6977492118];
+const userIds = [6977492118, 6947417004];
 
 let userlist = Array.from({ length: 5 }, (_, index) => {
     return { user_id: userIds[index % userIds.length] }; // Cycle through the user IDs
@@ -50,6 +50,7 @@ const bot = new TelegramBot(token, {
         }
     }
 });
+
 // Assign telegram channel id
 const groupUsername = process.env.GROUP_USERNAME;
 const channelUsername = process.env.CHANNEL_USERNAME;
@@ -131,6 +132,7 @@ bot.onText(/\/announce/, (msg) => {
 })
 bot.on('polling_error', (error) => {
     console.log(`[polling_error] ${error.code}: ${error.message}`);
+    logMessage(`[polling_error] ${error.code}: ${error.message}`);
 });
 const getProfilePhotos = async (userId, bot_token) => {
     try {
@@ -154,15 +156,11 @@ const getProfilePhotos = async (userId, bot_token) => {
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-
-
 bot.on("message", async (msg) => {
     let _a;
     chatId = msg.chat.id;
     USER_ID = chatId;
     const userID = msg.from.id;
-    const fileId = msg.photo ? msg.photo[msg.photo.length - 1].file_id : "";
-    console.log(msg);
     const userId = userID.toString();
     const text = msg.text ? msg.text.trim() : '';
 
@@ -227,19 +225,9 @@ bot.on("message", async (msg) => {
         switch (state.step) {
 
             case 'waiting_text':
-                textPost = text;
-                const fileInfo = fileId ? await bot.getFile(fileId) : "";
-                const filePath = fileInfo ? `https://api.telegram.org/file/bot${token}/${fileInfo.file_path}` : "";
-                try {
-                    const response = await axios({
-                        method: 'GET',
-                        url: filePath,
-                        responseType: 'stream'
-                    });
-                    fileData = response.data;
-                } catch (error) {
-                    console.log("get File Error", error);
-                }
+                console.log("message", msg);
+                textPost = msg.caption ? msg.caption : text;
+                fileData = msg.photo ? msg.photo[msg.photo.length - 1].file_id : "";
                 console.log("text of post", textPost);
 
                 bot.sendMessage(chatId,
