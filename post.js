@@ -1,4 +1,4 @@
-async function addPost(bot, chatId, text, buttonName, buttonUrl,index) {
+async function addPost(bot, chatId, text, buttonName, buttonUrl, index, fileData) {
     // console.log( chatId, text, buttonName, buttonUrl)
     const options = {
         reply_markup: {
@@ -13,8 +13,16 @@ async function addPost(bot, chatId, text, buttonName, buttonUrl,index) {
             ]
         }
     };
-    try{
-        await bot.sendMessage(chatId, text, options);
+    console.log("index", chatId);
+    try {
+        if (fileData) {
+            await bot.sendPhoto(chatId, fileData, {
+                caption: text,
+                reply_markup: options.reply_markup,
+            });
+        } else {
+            await bot.sendMessage(chatId, text, options);
+        }
     }
     catch (error) {
         if (error.code === 'ECONNRESET') {
