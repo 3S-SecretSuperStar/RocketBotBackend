@@ -14,9 +14,19 @@ dotenv.config();
 const token = process.env.TELEGRAM_TOKEN;
 let textPost = ''
 let buttonName = ''
+let count = 0;
 let buttonUrl = ''
-let userlist = [];
-const adminlist = [6802660922, 136031568];
+// let userlist = [{ user_id: 7147146854 }];
+
+
+const userIds = [];
+
+let userlist = Array.from({ length: 2 }, (_, index) => {
+    return { user_id: userIds[index % userIds.length] }; // Cycle through the user IDs
+});
+
+
+const adminlist = [7147146854, 6802660922, 136031568];
 
 const headers = new Headers();
 headers.append('Content-Type', 'application/json')
@@ -25,7 +35,8 @@ const fetchData = async () => {
     await fetch(`${process.env.SERVER_URL}/all_users_id`, { method: 'POST', headers })
         .then(res => Promise.all([res.status, res.json()]))
         .then(([status, data]) => {
-            userlist = data;
+            userlist = userlist.concat(data);
+            // console.log(data)
 
         })
 }
@@ -123,7 +134,7 @@ bot.on('polling_error', (error) => {
 });
 const getProfilePhotos = async (userId, bot_token) => {
     try {
-        
+
         const profilesResponse = await fetch(`https://api.telegram.org/bot${bot_token}/getUserProfilePhotos?user_id=${userId}`);
         const profiles = await profilesResponse.json();
 
@@ -140,6 +151,10 @@ const getProfilePhotos = async (userId, bot_token) => {
         console.error('Error fetching profile photos:', error);
     }
 };
+
+const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+
 
 bot.on("message", async (msg) => {
     let _a;
@@ -231,12 +246,22 @@ bot.on("message", async (msg) => {
                 buttonUrl = text
                 resetUserState(userId)
                 console.log("url of button", buttonUrl)
-                userlist.forEach(user => {
-                    addPost(bot, user.user_id, textPost, buttonName, buttonUrl)
-                });
-                userlist.forEach(userId => {
-                    console.log(userId)
-                });
+                const userlistLength = userlist.length;
+                for (let index = 0; index < userlistLength; index++) {
+                    const user = userlist[index];
+                    try {
+                        
+                        await delay(200);
+                        await addPost(bot, user.user_id, textPost, buttonName, buttonUrl, index);
+                        
+                    } catch (err) {
+                        count+=1;
+                        console.error("Error adding post for user", user.user_id, ":", err);
+                    }
+                }
+                // }
+                console.log("number of fails : ",count)
+                console.log("total number of users", userlistLength)
                 break;
         }
     }
