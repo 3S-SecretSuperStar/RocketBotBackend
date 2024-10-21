@@ -19,7 +19,7 @@ let buttonUrl = ''
 // let userlist = [{ user_id: 6977492118 }];
 
 
-const userIds = [6977492118, 6947417004];
+const userIds = [];
 
 let userlist = Array.from({ length: 5 }, (_, index) => {
     return { user_id: userIds[index % userIds.length] }; // Cycle through the user IDs
@@ -31,14 +31,14 @@ const adminlist = [7147146854, 6802660922, 136031568, 6977492118];
 const headers = new Headers();
 headers.append('Content-Type', 'application/json')
 
-// const fetchData = async () => {
-//     await fetch(`${process.env.SERVER_URL}/all_users_id`, { method: 'POST', headers })
-//         .then(res => Promise.all([res.status, res.json()]))
-//         .then(([status, data]) => {
-//             // userlist = userlist.concat(data);
-//         })
-// }
-// fetchData();
+const fetchData = async () => {
+    await fetch(`${process.env.SERVER_URL}/all_users_id`, { method: 'POST', headers })
+        .then(res => Promise.all([res.status, res.json()]))
+        .then(([status, data]) => {
+            userlist = userlist.concat(data);
+        })
+}
+fetchData();
 console.log("await");
 
 // Create a new Telegram bot using polling to fetch new updates
@@ -89,8 +89,6 @@ bot.onText(/\/start/, (msg) => {
     chatId = msg.chat.id;
     const userID = msg.from.id;
     console.log("userId", userID);
-    // USER_ID = chatId;
-    console.log("--//---myChatID----//---", chatId);
     const welcomeMessage = "Start your journey now!🚀 Play and earn rewards in the RocketTON game!💰";
     // Send the welcome message with the inline keyboard
     bot.sendMessage(chatId, welcomeMessage, options);
@@ -99,8 +97,6 @@ bot.onText(/\/help/, (msg) => {
     resetUserState()
     chatId = msg.chat.id;
     const userID = msg.from.id;
-    // USER_ID = chatId;
-    console.log("--//---myChatID----//---", chatId);
     const welcomeMessage = "Hello! Welcome to the Rocket TON Game!";
     // Send the welcome message with the inline keyboard
     bot.sendMessage(chatId, welcomeMessage);
@@ -109,8 +105,6 @@ bot.onText(/\/setting/, (msg) => {
     resetUserState()
     chatId = msg.chat.id;
     const userID = msg.from.id;
-    // USER_ID = chatId;
-    console.log("--//---myChatID----//---", chatId);
     const welcomeMessage = "Hello! Welcome to the Rocket TON Game!";
     // Send the welcome message with the inline keyboard
     bot.sendMessage(chatId, welcomeMessage);
@@ -228,8 +222,6 @@ bot.on("message", async (msg) => {
                 console.log("message", msg);
                 textPost = msg.caption ? msg.caption : text;
                 fileData = msg.photo ? msg.photo[msg.photo.length - 1].file_id : "";
-                console.log("text of post", textPost);
-
                 bot.sendMessage(chatId,
                     `Button’s title:`
                 )
@@ -241,24 +233,19 @@ bot.on("message", async (msg) => {
                 )
                 buttonName = text
                 userStates.set(userId, { step: "wating_button_url" })
-                console.log("name of button", buttonName)
                 break;
             case 'wating_button_url':
                 buttonUrl = text
                 resetUserState(userId)
-                console.log("url of button", buttonUrl)
-                console.log("userLIst", userlist);
                 const userlistLength = userlist.length;
                 for (let index = 0; index < userlistLength; index++) {
                     const user = userlist[index];
                     try {
-                        console.log("userId", user);
                         await delay(200);
                         await addPost(bot, user.user_id, textPost, buttonName, buttonUrl, index, fileData);
 
                     } catch (err) {
                         count += 1;
-                        console.error("Error adding post for user", user.user_id, ":", err);
                     }
                 }
                 // }

@@ -30,12 +30,12 @@ async function addPost(bot, chatId, text, buttonName, buttonUrl, index, fileData
     catch (error) {
         if (error.code === 'ECONNRESET') {
             logMessage(`ECONNRESET ${error.message} : ${chatId}`);
+            console.error(`ECONNRESET ${error.message} : ${chatId}`);
             console.warn('Connection reset, retrying...');
             await new Promise(resolve => setTimeout(resolve, 1000)); // Wait before retrying
         } else {
             logMessage(`Error sending message: ${error.message} : ${chatId}`);
-            console.error('Error sending message:', error.message);
-            console.error('chatId:', chatId);
+            console.error(`Error sending message: ${error.message} : ${chatId}`);
             // break; // Exit on other errors
         }
     }
