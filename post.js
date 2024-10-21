@@ -43,7 +43,7 @@ async function addPost(bot, chatId, text, buttonName, buttonUrl, index, fileData
 }
 
 // Specify the log file path
-const logFilePath = path.join("/var/avatar/", 'dev.log');
+const logFilePath = path.join("/var/data/", 'dev.log');
 
 // Function to write logs
 function logMessage(message) {
