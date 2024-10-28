@@ -9,7 +9,7 @@ async function addPost(bot, chatId, text, buttonName, buttonUrl, index, fileData
                 [
                     {
                         text: buttonName,
-                        url: buttonUrl // Replace with your channel's link
+                        url: "http://localhost:3000/goToChannel", // Replace with your channel's link
                     }
                 ]
 
@@ -39,7 +39,6 @@ async function addPost(bot, chatId, text, buttonName, buttonUrl, index, fileData
             // break; // Exit on other errors
         }
     }
-
 }
 
 // Specify the log file path

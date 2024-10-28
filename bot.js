@@ -12,33 +12,31 @@ const { addPost, logMessage } = require('./post')
 // Load environment variables
 dotenv.config();
 const token = process.env.TELEGRAM_TOKEN;
-let textPost = ''
-let buttonName = ''
+let textPost = '';
+let buttonName = '';
 let count = 0;
-let buttonUrl = ''
-// let userlist = [{ user_id: 6977492118 }];
-
-
+let buttonUrl = '';
 const userIds = [];
 
-let userlist = Array.from({ length: 5 }, (_, index) => {
-    return { user_id: userIds[index % userIds.length] }; // Cycle through the user IDs
-});
+// let userlist = Array.from({ length: 5 }, (_, index) => {
+//     return { user_id: userIds[index % userIds.length] }; // Cycle through the user IDs
+// });
 
+let userlist = [{ user_id: 6977492118 }];
 
 const adminlist = [7147146854, 6802660922, 136031568, 6977492118];
 
 const headers = new Headers();
 headers.append('Content-Type', 'application/json')
 
-const fetchData = async () => {
-    await fetch(`${process.env.SERVER_URL}/all_users_id`, { method: 'POST', headers })
-        .then(res => Promise.all([res.status, res.json()]))
-        .then(([status, data]) => {
-            userlist = userlist.concat(data);
-        })
-}
-fetchData();
+// const fetchData = async () => {
+//     await fetch(`${process.env.SERVER_URL}/all_users_id`, { method: 'POST', headers })
+//         .then(res => Promise.all([res.status, res.json()]))
+//         .then(([status, data]) => {
+//             userlist = userlist.concat(data);
+//         })
+// }
+// fetchData();
 console.log("await");
 
 // Create a new Telegram bot using polling to fetch new updates
@@ -217,47 +215,51 @@ bot.on("message", async (msg) => {
     console.log(state)
     if (state) {
         switch (state.step) {
-
             case 'waiting_text':
                 console.log("message", msg);
                 textPost = msg.caption ? msg.caption : text;
                 fileData = msg.photo ? msg.photo[msg.photo.length - 1].file_id : "";
                 bot.sendMessage(chatId,
                     `Button’s title:`
-                )
-                userStates.set(userId, { step: "wating_button_name" })
+                );
+                userStates.set(userId, { step: "waiting_button_name" });
                 break;
-            case 'wating_button_name':
+            case 'waiting_button_name':
                 bot.sendMessage(userId,
                     `Button’s URL:`
-                )
-                buttonName = text
-                userStates.set(userId, { step: "wating_button_url" })
+                );
+                buttonName = text;
+                userStates.set(userId, { step: "waiting_button_url" })
                 break;
-            case 'wating_button_url':
-                buttonUrl = text
-                resetUserState(userId)
+            case 'waiting_button_url':
+                buttonUrl = text;
+                resetUserState(userId);
                 const userlistLength = userlist.length;
                 for (let index = 0; index < userlistLength; index++) {
                     const user = userlist[index];
                     try {
                         await delay(200);
                         await addPost(bot, user.user_id, textPost, buttonName, buttonUrl, index, fileData);
-
                     } catch (err) {
                         count += 1;
                     }
                 }
-                // }
                 console.log("number of fails : ", count)
                 console.log("total number of users", userlistLength)
                 break;
         }
     }
 });
+
 const app = express();
 app.use(cors());
 app.use(express.json());
+
+app.get("/goToChannel", (req, res) => {
+    console.log(`Button clicked! Total clicks`);
+    res.redirect('https://t.me/+4DnAPr7zITQ0MzEx'); // Replace with your destination URL
+});
+
 app.listen(3000, () => {
     console.log("Server started on port 3000");
 });
