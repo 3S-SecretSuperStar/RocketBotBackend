@@ -18,25 +18,23 @@ let count = 0;
 let buttonUrl = '';
 const userIds = [];
 
-// let userlist = Array.from({ length: 5 }, (_, index) => {
-//     return { user_id: userIds[index % userIds.length] }; // Cycle through the user IDs
-// });
-
-let userlist = [{user_id: 6977492118}];
+let userlist = Array.from({ length: 5 }, (_, index) => {
+    return { user_id: userIds[index % userIds.length] }; // Cycle through the user IDs
+});
 
 const adminlist = [7147146854, 6802660922, 136031568, 6977492118];
 
 const headers = new Headers();
 headers.append('Content-Type', 'application/json')
 
-// const fetchData = async () => {
-//     await fetch(`${process.env.SERVER_URL}/all_users_id`, { method: 'POST', headers })
-//         .then(res => Promise.all([res.status, res.json()]))
-//         .then(([status, data]) => {
-//             userlist = userlist.concat(data);
-//         })
-// }
-// fetchData();
+const fetchData = async () => {
+    await fetch(`${process.env.SERVER_URL}/all_users_id`, { method: 'POST', headers })
+        .then(res => Promise.all([res.status, res.json()]))
+        .then(([status, data]) => {
+            userlist = userlist.concat(data);
+        })
+}
+fetchData();
 console.log("await");
 
 // Create a new Telegram bot using polling to fetch new updates
