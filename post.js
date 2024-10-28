@@ -9,7 +9,7 @@ async function addPost(bot, chatId, text, buttonName, buttonUrl, index, fileData
                 [
                     {
                         text: buttonName,
-                        url: "http://localhost:3000/goToChannel", // Replace with your channel's link
+                        url: "https://dashboard.render.com/web/srv-cr726btds78s738a033g/goToChannel", // Replace with your channel's link
                     }
                 ]
 
