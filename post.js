@@ -9,7 +9,7 @@ async function addPost(bot, chatId, text, buttonName, buttonUrl, index, fileData
                 [
                     {
                         text: buttonName,
-                        url: "https://tma-telegrambot.onrender.com/goToChannel", // Replace with your channel's link
+                        url: buttonUrl, // Replace with your channel's link
                     }
                 ]
 
@@ -56,5 +56,4 @@ function logMessage(message) {
         }
     });
 }
-
 module.exports = { addPost, logMessage };

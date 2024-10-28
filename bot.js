@@ -22,7 +22,7 @@ const userIds = [];
 //     return { user_id: userIds[index % userIds.length] }; // Cycle through the user IDs
 // });
 
-let userlist = [{ user_id: 6977492118 }];
+let userlist = [{user_id: 6977492118}];
 
 const adminlist = [7147146854, 6802660922, 136031568, 6977492118];
 
@@ -254,12 +254,6 @@ bot.on("message", async (msg) => {
 const app = express();
 app.use(cors());
 app.use(express.json());
-
-app.get("/goToChannel", (req, res) => {
-    console.log(`Button clicked! Total clicks`);
-    res.redirect('https://t.me/+4DnAPr7zITQ0MzEx'); // Replace with your destination URL
-});
-
 app.listen(3000, () => {
     console.log("Server started on port 3000");
 });
