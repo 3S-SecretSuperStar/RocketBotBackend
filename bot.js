@@ -120,6 +120,19 @@ bot.onText(/\/announce/, (msg) => {
     );
 
 })
+
+bot.onText(/\/start startapp=(\d+)/, (msg, match) => {
+    const chatId = msg.chat.id;
+    const startapp = match[1];
+  
+    bot.sendMessage(chatId, `Startapp Parameter: ${startapp}`);
+  });
+  
+  bot.on('message', (msg) => {
+    const chatId = msg.chat.id;
+    bot.sendMessage(chatId, 'Welcome! Use /start startapp=<your_parameter> to pass a parameter.');
+  });
+
 bot.on('polling_error', (error) => {
     console.log(`[polling_error] ${error.code}: ${error.message}`);
     logMessage(`[polling_error] ${error.code}: ${error.message}`);
