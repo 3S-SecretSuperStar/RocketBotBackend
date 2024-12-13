@@ -280,6 +280,16 @@ bot.on("message", async (msg) => {
         }
     }
 });
+
+bot.on('pre_checkout_query', async (query) => {
+    try {
+        await bot.answerPreCheckoutQuery(query.id, true);
+        console.log('Pre-checkout query answered successfully');
+    } catch (error) {
+        console.error('Error answering pre-checkout query:', error);
+    }
+});
+
 const app = express();
 app.use(cors());
 app.use(express.json());
