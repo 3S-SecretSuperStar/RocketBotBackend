@@ -7,38 +7,34 @@ const axios = require("axios");
 const express = require("express");
 const cors = require("cors");
 const { userStates, resetUserState } = require('./state')
-const { addPost } = require('./post')
+const { addPost, logMessage } = require('./post')
 
 // Load environment variables
 dotenv.config();
 const token = process.env.TELEGRAM_TOKEN;
-let textPost = ''
-let buttonName = ''
+let textPost = '';
+let buttonName = '';
 let count = 0;
-let buttonUrl = ''
-// let userlist = [{ user_id: 6977492118 }];
-
-
-const userIds = [6977492118];
+let buttonUrl = '';
+const userIds = [];
 
 let userlist = Array.from({ length: 5 }, (_, index) => {
     return { user_id: userIds[index % userIds.length] }; // Cycle through the user IDs
 });
-
 
 const adminlist = [7147146854, 6802660922, 136031568, 6977492118];
 
 const headers = new Headers();
 headers.append('Content-Type', 'application/json')
 
-// const fetchData = async () => {
-//     await fetch(`${process.env.SERVER_URL}/all_users_id`, { method: 'POST', headers })
-//         .then(res => Promise.all([res.status, res.json()]))
-//         .then(([status, data]) => {
-//             // userlist = userlist.concat(data);
-//         })
-// }
-// fetchData();
+const fetchData = async () => {
+    await fetch(`${process.env.SERVER_URL}/all_users_id`, { method: 'POST', headers })
+        .then(res => Promise.all([res.status, res.json()]))
+        .then(([status, data]) => {
+            userlist = userlist.concat(data);
+        })
+}
+fetchData();
 console.log("await");
 
 // Create a new Telegram bot using polling to fetch new updates
@@ -50,6 +46,7 @@ const bot = new TelegramBot(token, {
         }
     }
 });
+
 // Assign telegram channel id
 const groupUsername = process.env.GROUP_USERNAME;
 const channelUsername = process.env.CHANNEL_USERNAME;
@@ -88,8 +85,6 @@ bot.onText(/\/start/, (msg) => {
     chatId = msg.chat.id;
     const userID = msg.from.id;
     console.log("userId", userID);
-    // USER_ID = chatId;
-    console.log("--//---myChatID----//---", chatId);
     const welcomeMessage = "Start your journey now!🚀 Play and earn rewards in the RocketTON game!💰";
     // Send the welcome message with the inline keyboard
     bot.sendMessage(chatId, welcomeMessage, options);
@@ -98,8 +93,6 @@ bot.onText(/\/help/, (msg) => {
     resetUserState()
     chatId = msg.chat.id;
     const userID = msg.from.id;
-    // USER_ID = chatId;
-    console.log("--//---myChatID----//---", chatId);
     const welcomeMessage = "Hello! Welcome to the Rocket TON Game!";
     // Send the welcome message with the inline keyboard
     bot.sendMessage(chatId, welcomeMessage);
@@ -108,8 +101,6 @@ bot.onText(/\/setting/, (msg) => {
     resetUserState()
     chatId = msg.chat.id;
     const userID = msg.from.id;
-    // USER_ID = chatId;
-    console.log("--//---myChatID----//---", chatId);
     const welcomeMessage = "Hello! Welcome to the Rocket TON Game!";
     // Send the welcome message with the inline keyboard
     bot.sendMessage(chatId, welcomeMessage);
@@ -129,8 +120,22 @@ bot.onText(/\/announce/, (msg) => {
     );
 
 })
+
+bot.onText(/\/start startapp=(\d+)/, (msg, match) => {
+    const chatId = msg.chat.id;
+    const startapp = match[1];
+  
+    bot.sendMessage(chatId, `Startapp Parameter: ${startapp}`);
+  });
+  
+  bot.on('message', (msg) => {
+    const chatId = msg.chat.id;
+    bot.sendMessage(chatId, 'Welcome! Use /start startapp=<your_parameter> to pass a parameter.');
+  });
+
 bot.on('polling_error', (error) => {
     console.log(`[polling_error] ${error.code}: ${error.message}`);
+    logMessage(`[polling_error] ${error.code}: ${error.message}`);
 });
 const getProfilePhotos = async (userId, bot_token) => {
     try {
@@ -154,15 +159,11 @@ const getProfilePhotos = async (userId, bot_token) => {
 
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
-
-
 bot.on("message", async (msg) => {
     let _a;
     chatId = msg.chat.id;
     USER_ID = chatId;
     const userID = msg.from.id;
-    const fileId = msg.photo ? msg.photo[msg.photo.length - 1].file_id : "";
-    console.log(msg);
     const userId = userID.toString();
     const text = msg.text ? msg.text.trim() : '';
 
@@ -225,55 +226,35 @@ bot.on("message", async (msg) => {
     console.log(state)
     if (state) {
         switch (state.step) {
-
             case 'waiting_text':
-                textPost = text;
-                const fileInfo = fileId ? await bot.getFile(fileId) : "";
-                const filePath = fileInfo ? `https://api.telegram.org/file/bot${token}/${fileInfo.file_path}` : "";
-                try {
-                    const response = await axios({
-                        method: 'GET',
-                        url: filePath,
-                        responseType: 'stream'
-                    });
-                    fileData = response.data;
-                } catch (error) {
-                    console.log("get File Error", error);
-                }
-                console.log("text of post", textPost);
-
+                console.log("message", msg);
+                textPost = msg.caption ? msg.caption : text;
+                fileData = msg.photo ? msg.photo[msg.photo.length - 1].file_id : "";
                 bot.sendMessage(chatId,
                     `Button’s title:`
-                )
-                userStates.set(userId, { step: "wating_button_name" })
+                );
+                userStates.set(userId, { step: "waiting_button_name" });
                 break;
-            case 'wating_button_name':
+            case 'waiting_button_name':
                 bot.sendMessage(userId,
                     `Button’s URL:`
-                )
-                buttonName = text
-                userStates.set(userId, { step: "wating_button_url" })
-                console.log("name of button", buttonName)
+                );
+                buttonName = text;
+                userStates.set(userId, { step: "waiting_button_url" })
                 break;
-            case 'wating_button_url':
-                buttonUrl = text
-                resetUserState(userId)
-                console.log("url of button", buttonUrl)
-                console.log("userLIst", userlist);
+            case 'waiting_button_url':
+                buttonUrl = text;
+                resetUserState(userId);
                 const userlistLength = userlist.length;
                 for (let index = 0; index < userlistLength; index++) {
                     const user = userlist[index];
                     try {
-                        console.log("userId", user);
                         await delay(200);
                         await addPost(bot, user.user_id, textPost, buttonName, buttonUrl, index, fileData);
-
                     } catch (err) {
                         count += 1;
-                        console.error("Error adding post for user", user.user_id, ":", err);
                     }
                 }
-                // }
                 console.log("number of fails : ", count)
                 console.log("total number of users", userlistLength)
                 break;
